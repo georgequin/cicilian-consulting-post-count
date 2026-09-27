@@ -1,24 +1,30 @@
 :root {
-  --bg: #f4f6fa;
+  /* Cecilia Consulting brand: sky blue #29A9E1, deep blue #367098, peach #EAB684 */
+  --brand-sky: #29a9e1;
+  --brand-deep: #367098;
+  --brand-peach: #eab684;
+  --bg: #f3f7fa;
   --surface: #ffffff;
-  --surface-2: #edf1f7;
-  --line: #dce2ec;
-  --line-strong: #c3ccda;
-  --ink: #16213a;
-  --ink-2: #4a566e;
-  --ink-3: #77829a;
-  --accent: #1f5fa8;
+  --surface-2: #eaf2f8;
+  --line: #d9e5ee;
+  --line-strong: #bccfdd;
+  --ink: #15304a;
+  --ink-2: #455e75;
+  --ink-3: #74889b;
+  --accent: #2f6a92;
   --accent-ink: #ffffff;
-  --accent-soft: #e3ecf8;
+  --accent-soft: #e2f1fa;
+  --peach-soft: #fbeedf;
+  --peach-ink: #8a5424;
   --crit: #c23b3b;
   --li: #0a66c2;
   --ig: #c13584;
   --fb: #1877f2;
-  --tt: #111111;
+  --tt: #15304a;
   --x: #333333;
   --wa: #1da851;
-  --scrim: rgba(10, 15, 28, 0.45);
-  --shadow: 0 1px 2px rgba(22, 33, 58, 0.06), 0 6px 20px rgba(22, 33, 58, 0.08);
+  --scrim: rgba(10, 25, 40, 0.45);
+  --shadow: 0 1px 2px rgba(21, 48, 74, 0.06), 0 6px 20px rgba(21, 48, 74, 0.08);
   --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --body: "Public Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -27,22 +33,24 @@
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --bg: #0f1522;
-    --surface: #172033;
-    --surface-2: #1e293f;
-    --line: #2a3651;
-    --line-strong: #3a4868;
-    --ink: #e7ecf5;
-    --ink-2: #aeb8cc;
-    --ink-3: #7e8aa3;
-    --accent: #6fa6e8;
-    --accent-ink: #0f1522;
-    --accent-soft: #1d3150;
+    --bg: #0d1a26;
+    --surface: #132536;
+    --surface-2: #1a3043;
+    --line: #243c52;
+    --line-strong: #33506a;
+    --ink: #e6eef5;
+    --ink-2: #a9bccc;
+    --ink-3: #7b91a4;
+    --accent: #5dbbea;
+    --accent-ink: #0d1a26;
+    --accent-soft: #173a53;
+    --peach-soft: #3a2c1f;
+    --peach-ink: #f0c89f;
     --crit: #ee7171;
     --li: #5aa2f0;
     --ig: #e77ab8;
     --fb: #6fa2f7;
-    --tt: #d9dee8;
+    --tt: #d9e3ec;
     --x: #c9cfda;
     --wa: #4ccb7f;
     --scrim: rgba(0, 0, 0, 0.6);
@@ -94,7 +102,10 @@ textarea { resize: vertical; min-height: 96px; }
 }
 .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); font-weight: 600; }
-.top h1 { font-size: 26px; font-weight: 700; margin-top: 2px; }
+.brand { display: block; height: 34px; width: auto; }
+@media (min-width: 560px) { .brand { height: 40px; } }
+.top h1 { font-size: 22px; font-weight: 700; margin-top: 10px; }
+.top h1 .sub { color: var(--ink-3); font-weight: 600; }
 .summary { color: var(--ink-2); font-size: 14px; margin-top: 2px; }
 .summary b { color: var(--ink); }
 .top-actions { display: flex; gap: 8px; align-items: center; }
@@ -115,8 +126,9 @@ textarea { resize: vertical; min-height: 96px; }
   display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
   padding: 8px 0;
 }
-.week-head h2 { font-size: 16px; font-weight: 600; }
-.week-head .range { font-family: var(--body); font-weight: 400; color: var(--ink-3); font-size: 13px; margin-left: 6px; }
+.week-head h2 { font-size: 16px; font-weight: 600; display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 6px; }
+.now { font-family: var(--body); font-size: 11.5px; font-weight: 700; letter-spacing: 0.02em; background: var(--peach-soft); color: var(--peach-ink); border-radius: 999px; padding: 2px 9px; align-self: center; }
+.week-head .range { font-family: var(--body); font-weight: 400; color: var(--ink-3); font-size: 13px; }
 .week-head .count { color: var(--ink-3); font-size: 12.5px; white-space: nowrap; }
 
 .feed { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
@@ -254,7 +266,8 @@ textarea { resize: vertical; min-height: 96px; }
   width: 100%; max-width: 380px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
   padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: var(--shadow);
 }
-.login h1 { font-size: 24px; }
+.login h1 { font-size: 22px; }
+.login .brand { height: 44px; align-self: flex-start; }
 .notice { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; color: var(--ink-2); }
 .notice code { font-family: var(--mono); font-size: 13px; }
 

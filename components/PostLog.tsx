@@ -319,8 +319,11 @@ export default function PostLog({
       <main className="shell">
         <header className="top">
           <div>
-            <span className="eyebrow">Cecilia Consulting · Social media</span>
-            <h1>Post Log</h1>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="brand" src="/logo.png" alt="Cecilia Consulting" width={534} height={125} />
+            <h1>
+              Post Log <span className="sub">· Social media</span>
+            </h1>
             <div className="summary">
               {posts.length ? (
                 <>
@@ -386,7 +389,7 @@ export default function PostLog({
               <section className="week" key={monday} aria-label={label}>
                 <div className="week-head">
                   <h2>
-                    {label}
+                    {monday === thisMonday ? <span className="now">This week</span> : label}
                     <span className="range">
                       {fmt(monday, { day: "numeric", month: "short" })} –{" "}
                       {fmt(monday + 6 * 864e5, { day: "numeric", month: "short", year: "numeric" })}

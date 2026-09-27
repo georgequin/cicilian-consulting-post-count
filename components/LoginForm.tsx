@@ -34,8 +34,9 @@ export default function LoginForm({ viewLocked }: { viewLocked: boolean }) {
   return (
     <main className="login-wrap">
       <form className="login" onSubmit={submit}>
-        <span className="eyebrow">Cecilia Consulting · Social media</span>
-        <h1>Post Log</h1>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="brand" src="/logo.png" alt="Cecilia Consulting" width={534} height={125} />
+        <h1>Social media Post Log</h1>
         <p className="summary" style={{ margin: 0 }}>
           {viewLocked
             ? "Enter your password. Viewers can scroll the log; the editor can also log posts."
