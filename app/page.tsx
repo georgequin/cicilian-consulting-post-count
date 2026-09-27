@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { adminConfigured, currentRole, viewLocked } from "@/lib/auth";
-import { databaseUrl, listPosts } from "@/lib/db";
+import { databaseUrl, listAccounts, listPosts } from "@/lib/db";
 import { uploadsEnabled } from "@/lib/blob";
 import PostLog from "@/components/PostLog";
 import SetupNotice from "@/components/SetupNotice";
@@ -16,10 +16,11 @@ export default async function Home() {
   const role = await currentRole();
   if (!role) redirect("/login");
 
-  const posts = await listPosts();
+  const [posts, accounts] = await Promise.all([listPosts(), listAccounts()]);
   return (
     <PostLog
       initialPosts={posts}
+      initialAccounts={accounts}
       isAdmin={role === "admin"}
       uploads={uploadsEnabled()}
       viewLocked={viewLocked()}

@@ -10,12 +10,12 @@ import type { Preview } from "./types";
  * links (TikTok's especially) expire after a few days.
  */
 
-const BOT_UA = "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)";
-const BROWSER_UA =
+export const BOT_UA = "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)";
+export const BROWSER_UA =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1";
 const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
 
-async function get(url: string, ua: string, ms = 6000): Promise<Response | null> {
+export async function get(url: string, ua: string, ms = 6000): Promise<Response | null> {
   try {
     return await fetch(url, {
       redirect: "follow",
@@ -28,7 +28,7 @@ async function get(url: string, ua: string, ms = 6000): Promise<Response | null>
 }
 
 /** Only public http(s) hosts; refuses localhost and bare IP addresses. */
-function allowed(raw: string): URL | null {
+export function allowed(raw: string): URL | null {
   try {
     const u = new URL(raw);
     if (u.protocol !== "https:" && u.protocol !== "http:") return null;
@@ -53,7 +53,7 @@ function decode(s: string): string {
     .trim();
 }
 
-function meta(html: string, names: string[]): string {
+export function meta(html: string, names: string[]): string {
   for (const name of names) {
     const re = new RegExp(
       `<meta[^>]+(?:property|name)=["']${name}["'][^>]*content=["']([^"']*)["']|<meta[^>]+content=["']([^"']*)["'][^>]*(?:property|name)=["']${name}["']`,
@@ -120,7 +120,7 @@ async function discover(link: string): Promise<Raw | null> {
   return openGraph(finalUrl);
 }
 
-async function copyImage(src: string): Promise<string | null> {
+export async function copyImage(src: string): Promise<string | null> {
   if (!src || !uploadsEnabled() || !allowed(src)) return null;
   const res = await get(src, BROWSER_UA, 8000);
   if (!res?.ok) return null;

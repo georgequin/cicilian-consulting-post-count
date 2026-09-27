@@ -20,4 +20,26 @@ export type PostInput = Pick<Post, "date" | "time" | "title" | "link" | "platfor
 
 export type Preview = { thumbUrl: string | null; title: string; author: string };
 
+export type StatPoint = {
+  date: string; // YYYY-MM-DD
+  followers: number | null;
+  following: number | null;
+  likes: number | null;
+  posts: number | null;
+  source: "auto" | "manual";
+};
+
+export type Account = {
+  id: string;
+  platform: string;
+  handle: string;
+  name: string;
+  url: string;
+  avatarUrl: string | null;
+  history: StatPoint[]; // oldest first
+};
+
+export type AccountInput = { platform: string; handle: string; name: string; url: string };
+export type AccountStatInput = { date: string; followers: number | null; following: number | null; likes: number | null; posts: number | null };
+
 export type Role = "admin" | "viewer";

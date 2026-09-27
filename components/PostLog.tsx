@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PLATFORMS, type Post } from "@/lib/types";
+import { PLATFORMS, type Account, type Post } from "@/lib/types";
+import Accounts from "./Accounts";
 
 const PLATFORM_COLOR: Record<string, string> = {
   LinkedIn: "var(--li)",
@@ -121,11 +122,13 @@ function sortPosts(a: Post, b: Post) {
 
 export default function PostLog({
   initialPosts,
+  initialAccounts,
   isAdmin,
   uploads,
   viewLocked,
 }: {
   initialPosts: Post[];
+  initialAccounts: Account[];
   isAdmin: boolean;
   uploads: boolean;
   viewLocked: boolean;
@@ -352,6 +355,10 @@ export default function PostLog({
             )}
           </div>
         </header>
+
+        <Accounts initial={initialAccounts} posts={posts} isAdmin={isAdmin} thisMonday={thisMonday} onToast={say} />
+
+        <h2 className="section-title">Posts</h2>
 
         {usedPlatforms.length > 1 && (
           <nav className="filters" aria-label="Filter by platform">
