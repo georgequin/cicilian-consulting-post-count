@@ -17,7 +17,7 @@ Built with Next.js, Postgres (Neon) and Vercel Blob for screenshots.
    git push -u origin main
    ```
 2. **Import it into Vercel.** On vercel.com, choose **Add New → Project**, pick the repository and keep the defaults (framework: Next.js). You can let the first deploy run. It will show an "Almost ready" page until the steps below are done.
-3. **Add the database.** In the project, open **Storage → Create Database → Neon (Postgres)** and connect it to the project. Vercel adds `DATABASE_URL` for you. The app creates its table on first use.
+3. **Add the database.** In the project, open **Storage → Create Database**, choose Postgres (Neon or Prisma Postgres both work) and connect it to the project. Vercel adds `DATABASE_URL` for you. The app creates its table on first use. `vercel.json` runs the app in Frankfurt (`fra1`), so put the database there too.
 4. **Add screenshot storage (optional).** In **Storage → Create → Blob**, create a store and connect it. Vercel adds `BLOB_READ_WRITE_TOKEN`. Without it the app works, just without screenshots.
 5. **Set the passwords.** In **Settings → Environment Variables**, add:
 
