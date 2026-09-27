@@ -23,6 +23,9 @@ CREATE TABLE IF NOT EXISTS posts (
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS posts_when_idx ON posts (post_date DESC, post_time DESC NULLS LAST);
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS thumb_url text;
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS preview_title text NOT NULL DEFAULT '';
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS preview_author text NOT NULL DEFAULT '';
 `);
 console.log("posts table is ready");
 await sql.end();

@@ -1,5 +1,5 @@
 import postgres from "postgres";
-import type { Post, PostInput } from "./types";
+import type { Post, PostInput, Preview } from "./types";
 
 type Sql = ReturnType<typeof postgres>;
 
@@ -42,6 +42,9 @@ CREATE TABLE IF NOT EXISTS posts (
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS posts_when_idx ON posts (post_date DESC, post_time DESC NULLS LAST);
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS thumb_url text;
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS preview_title text NOT NULL DEFAULT '';
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS preview_author text NOT NULL DEFAULT '';
 `;
 
 /** Creates the table on first use, so a fresh deploy works with no manual migration step. */
@@ -63,6 +66,9 @@ const COLUMNS = `
   COALESCE(to_char(post_time, 'HH24:MI'), '') AS time,
   title, link, platforms, comment,
   image_url           AS "imageUrl",
+  thumb_url           AS "thumbUrl",
+  preview_title       AS "previewTitle",
+  preview_author      AS "previewAuthor",
   updated_at          AS "updatedAt"
 `;
 
@@ -76,6 +82,9 @@ function toPost(row: Record<string, unknown>): Post {
     platforms: (row.platforms as string[]) ?? [],
     comment: String(row.comment ?? ""),
     imageUrl: (row.imageUrl as string | null) ?? null,
+    thumbUrl: (row.thumbUrl as string | null) ?? null,
+    previewTitle: String(row.previewTitle ?? ""),
+    previewAuthor: String(row.previewAuthor ?? ""),
     updatedAt: new Date(row.updatedAt as string).toISOString(),
   };
 }
@@ -123,4 +132,13 @@ export async function deletePost(id: string): Promise<Post | null> {
   const sql = await ready();
   await sql.unsafe(`DELETE FROM posts WHERE id = $1`, [id]);
   return existing;
+}
+
+export async function setPreview(id: string, p: Preview): Promise<Post | null> {
+  const sql = await ready();
+  const rows = await sql.unsafe(
+    `UPDATE posts SET thumb_url = $2, preview_title = $3, preview_author = $4 WHERE id = $1 RETURNING ${COLUMNS}`,
+    [id, p.thumbUrl, p.title, p.author] as never[]
+  );
+  return rows[0] ? toPost(rows[0]) : null;
 }

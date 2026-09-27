@@ -64,6 +64,38 @@ async function shrink(file: File): Promise<Blob> {
   }
 }
 
+function MediaTile({ post, media, onZoom }: { post: Post; media: string | null; onZoom: (u: string) => void }) {
+  const primary = post.platforms[0] ?? "";
+  const style = { ["--pc" as string]: PLATFORM_COLOR[primary] ?? "var(--accent)" };
+  const inner = media ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={media} alt="" loading="lazy" />
+  ) : (
+    <span className="tile-empty">{primary ? primary.slice(0, 2) : "•"}</span>
+  );
+  const badge = primary ? <span className="tile-badge">{primary}</span> : null;
+  if (post.link)
+    return (
+      <a className="tile" style={style} href={post.link} target="_blank" rel="noopener noreferrer" aria-label="Open post">
+        {inner}
+        {badge}
+      </a>
+    );
+  if (media)
+    return (
+      <button className="tile" style={style} onClick={() => onZoom(media)} aria-label="View screenshot">
+        {inner}
+        {badge}
+      </button>
+    );
+  return (
+    <div className="tile" style={style}>
+      {inner}
+      {badge}
+    </div>
+  );
+}
+
 type Draft = {
   date: string;
   time: string;
@@ -148,7 +180,7 @@ export default function PostLog({
   }, [open, zoom, saving]);
 
   useEffect(() => {
-    if (open) setTimeout(() => titleRef.current?.focus({ preventScroll: true }), 60);
+    if (open) setTimeout(() => document.getElementById("f-link")?.focus({ preventScroll: true }), 60);
   }, [open]);
 
   const sorted = useMemo(() => [...posts].sort(sortPosts), [posts]);
@@ -258,6 +290,25 @@ export default function PostLog({
     }
   }
 
+  const [refreshing, setRefreshing] = useState(false);
+  async function refreshPreview() {
+    if (!editing) return;
+    setRefreshing(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/posts/${editing.id}/preview`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Couldn't fetch a preview.");
+      const post: Post = data.post;
+      setEditing(post);
+      setPosts((ps) => ps.map((p) => (p.id === post.id ? post : p)));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't fetch a preview.");
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   async function logout() {
     await fetch("/api/logout", { method: "POST" }).catch(() => null);
     window.location.href = viewLocked ? "/login" : "/";
@@ -345,60 +396,63 @@ export default function PostLog({
                     {list.length} post{list.length === 1 ? "" : "s"}
                   </span>
                 </div>
-                <div className="feed">
-                  {list.map((p) => (
-                    <article className="entry" key={p.id}>
-                      <div className="entry-main">
-                        <div className="entry-body">
-                          <div className="when">
-                            {fmt(utc(p.date), { weekday: "short", day: "numeric", month: "short" })}
-                            {p.time && ` · ${p.time}`}
-                          </div>
-                          <div className="title">
-                            {p.link ? (
-                              <a href={p.link} target="_blank" rel="noopener noreferrer">
-                                {p.title || host(p.link)}
-                              </a>
-                            ) : (
-                              p.title
+                <ol className="feed">
+                  {list.map((p, i) => {
+                    const sameDayAsPrev = i > 0 && list[i - 1].date === p.date;
+                    const d = utc(p.date);
+                    const caption = p.title || p.previewTitle || (p.link ? host(p.link) : "Untitled post");
+                    const media = p.thumbUrl || p.imageUrl;
+                    const primary = p.platforms[0];
+                    return (
+                      <li className={"item" + (i === list.length - 1 ? " last" : "")} key={p.id}>
+                        <div className="day" aria-hidden={sameDayAsPrev}>
+                          {!sameDayAsPrev && (
+                            <>
+                              <span className="day-num">{fmt(d, { day: "numeric" })}</span>
+                              <span className="day-name">{fmt(d, { weekday: "short" })}</span>
+                            </>
+                          )}
+                        </div>
+                        <div className="rail">
+                          <span className="dot" style={{ ["--pc" as string]: PLATFORM_COLOR[primary] ?? "var(--accent)" }} />
+                        </div>
+                        <article className="card">
+                          <MediaTile post={p} media={media} onZoom={setZoom} />
+                          <div className="card-body">
+                            <div className="card-meta">
+                              <span className="sr-only">{fmt(d, { weekday: "long", day: "numeric", month: "long" })}</span>
+                              {p.previewAuthor && <span className="author">{p.previewAuthor.startsWith("@") ? p.previewAuthor : p.previewAuthor}</span>}
+                              {p.time && <span className="num">{p.time}</span>}
+                            </div>
+                            <p className="caption">{caption}</p>
+                            {p.platforms.length > 0 && (
+                              <div className="chips">
+                                {p.platforms.map((pl) => (
+                                  <span key={pl} className="chip" style={{ ["--pc" as string]: PLATFORM_COLOR[pl] ?? "var(--ink-3)" }}>
+                                    {pl}
+                                  </span>
+                                ))}
+                              </div>
                             )}
+                            {p.comment && <p className="comment">{p.comment}</p>}
+                            <div className="card-actions">
+                              {p.link && (
+                                <a className="open" href={p.link} target="_blank" rel="noopener noreferrer">
+                                  Open post ↗
+                                </a>
+                              )}
+                              {isAdmin && (
+                                <button className="text" onClick={() => startEdit(p)}>
+                                  Edit
+                                </button>
+                              )}
+                            </div>
                           </div>
-                          {p.platforms.length > 0 && (
-                            <div className="chips">
-                              {p.platforms.map((pl) => (
-                                <span key={pl} className="chip" style={{ ["--pc" as string]: PLATFORM_COLOR[pl] ?? "var(--ink-3)" }}>
-                                  {pl}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                          {p.link && p.title && (
-                            <div className="linkline">
-                              ↗{" "}
-                              <a href={p.link} target="_blank" rel="noopener noreferrer">
-                                {host(p.link)}
-                              </a>
-                            </div>
-                          )}
-                        </div>
-                        {p.imageUrl && (
-                          <button className="thumb" onClick={() => setZoom(p.imageUrl)} aria-label="View screenshot">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={p.imageUrl} alt="" loading="lazy" />
-                          </button>
-                        )}
-                      </div>
-                      {p.comment && <div className="comment">{p.comment}</div>}
-                      {isAdmin && (
-                        <div className="entry-tools">
-                          <button className="text" onClick={() => startEdit(p)}>
-                            Edit
-                          </button>
-                        </div>
-                      )}
-                    </article>
-                  ))}
-                </div>
+                        </article>
+                      </li>
+                    );
+                  })}
+                </ol>
               </section>
             );
           })
@@ -434,17 +488,6 @@ export default function PostLog({
                 </div>
               </div>
               <div className="field">
-                <label htmlFor="f-title">What was posted</label>
-                <input
-                  id="f-title"
-                  ref={titleRef}
-                  value={draft.title}
-                  onChange={(e) => set("title", e.target.value)}
-                  placeholder="e.g. 5 Mistakes That Slow Business Growth"
-                  enterKeyHint="next"
-                />
-              </div>
-              <div className="field">
                 <label htmlFor="f-link">Link to the post</label>
                 <input
                   id="f-link"
@@ -455,6 +498,34 @@ export default function PostLog({
                   value={draft.link}
                   onChange={(e) => set("link", e.target.value)}
                   placeholder="https://www.linkedin.com/posts/…"
+                />
+              </div>
+              {editing && editing.link && (
+                <div className="preview-row">
+                  {editing.thumbUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={editing.thumbUrl} alt="" />
+                  ) : (
+                    <span className="preview-none">No preview</span>
+                  )}
+                  <div className="preview-text">
+                    <span>{editing.previewTitle || "Nothing fetched from this link yet."}</span>
+                    <button type="button" className="text" onClick={refreshPreview} disabled={refreshing}>
+                      {refreshing ? "Fetching…" : "Refresh preview"}
+                    </button>
+                  </div>
+                </div>
+              )}
+              {!editing && <span className="hint">The thumbnail and caption are pulled from the link when you save.</span>}
+              <div className="field">
+                <label htmlFor="f-title">Title</label>
+                <input
+                  id="f-title"
+                  ref={titleRef}
+                  value={draft.title}
+                  onChange={(e) => set("title", e.target.value)}
+                  placeholder="Optional: the post's caption is used if you leave this blank"
+                  enterKeyHint="next"
                 />
               </div>
               <div className="field">

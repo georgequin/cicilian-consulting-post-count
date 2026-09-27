@@ -9,10 +9,15 @@ export type Post = {
   link: string;
   platforms: string[];
   comment: string;
-  imageUrl: string | null;
+  imageUrl: string | null; // screenshot the editor uploaded
+  thumbUrl: string | null; // thumbnail fetched from the link
+  previewTitle: string; // caption/title fetched from the link
+  previewAuthor: string; // account name fetched from the link
   updatedAt: string;
 };
 
-export type PostInput = Omit<Post, "id" | "updatedAt">;
+export type PostInput = Pick<Post, "date" | "time" | "title" | "link" | "platforms" | "comment" | "imageUrl">;
+
+export type Preview = { thumbUrl: string | null; title: string; author: string };
 
 export type Role = "admin" | "viewer";
